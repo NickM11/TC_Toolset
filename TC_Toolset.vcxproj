@@ -138,9 +138,9 @@
   <ItemGroup>
     <ClInclude Include="capacity.h" />
     <ClInclude Include="codebook.h" />
-    <ClInclude Include="fsm.h" />
     <ClInclude Include="generator.h" />
     <ClInclude Include="include\constrained\capacity.h" />
+    <ClInclude Include="include\constrained\fsm.h" />
     <ClInclude Include="include\constrained\io_utils.h" />
     <ClInclude Include="include\constrained\states.h" />
     <ClInclude Include="include\constrained\types.h" />

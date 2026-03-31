@@ -47,9 +47,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fsm.h">
-      <Filter>include\constrained</Filter>
-    </ClInclude>
     <ClInclude Include="generator.h">
       <Filter>include\constrained</Filter>
     </ClInclude>
@@ -69,6 +66,9 @@
       <Filter>include\constrained</Filter>
     </ClInclude>
     <ClInclude Include="include\constrained\io_utils.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\fsm.h">
       <Filter>include\constrained</Filter>
     </ClInclude>
   </ItemGroup>

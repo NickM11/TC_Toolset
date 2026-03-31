@@ -1,0 +1,2 @@
+n,k,maxRunLength,firstBlockLength,secondBlockLength,requiredCodewords,foundCodewords,lambda,capacity
+10,7,5,5,5,128,928,1.96595,0.975225
