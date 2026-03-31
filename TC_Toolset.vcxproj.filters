@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{bca4bddf-f40a-4b3c-b414-1ad3c9d8f69a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{777113b3-f8b6-47b5-9f42-7c8cd7118b62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\constrained">
+      <UniqueIdentifier>{edeb01c6-47db-48f3-9032-44c641547f9a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TC_Toolset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\capacity.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fsm.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\states.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codebook.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io_utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fsm.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="generator.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="capacity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\states.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\capacity.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="codebook.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\types.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\io_utils.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
