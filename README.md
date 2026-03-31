@@ -34,20 +34,20 @@ We consider a **binary channel with maximum run-length constraint** \(R\):
 - No more than \(R\) identical bits in a row
 - Example for \(R = 4\):
 
-- ## 📁 Project Structure
+  ## 📁 Project Structure
 - include/constrained/
-types.h
-states.h
-fsm.h
-generator.h
-capacity.h
-codebook.h
-io_utils.h
-
-src/
-states.cpp
-fsm.cpp
-generator.cpp
-capacity.cpp
-codebook.cpp
-io_utils.cpp
+- types.h
+- states.h
+- fsm.h
+- generator.h
+- capacity.h
+- codebook.h
+- io_utils.h
+-
+- src/
+- states.cpp
+- fsm.cpp
+- generator.cpp
+- capacity.cpp
+- codebook.cpp
+- io_utils.cpp
