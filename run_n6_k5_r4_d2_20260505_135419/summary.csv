@@ -1,0 +1,2 @@
+n,k,maxRunLength,divisionFactor,firstBlockLength,secondBlockLength,requiredCodewords,foundCodewords,codeRate,lambda,capacity,rateEfficiency
+6,5,4,2,3,3,32,58,0.833333,1.92756,0.946777,88.0179

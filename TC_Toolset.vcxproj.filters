@@ -47,9 +47,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="generator.h">
-      <Filter>include\constrained</Filter>
-    </ClInclude>
     <ClInclude Include="capacity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -59,9 +56,6 @@
     <ClInclude Include="include\constrained\capacity.h">
       <Filter>include\constrained</Filter>
     </ClInclude>
-    <ClInclude Include="codebook.h">
-      <Filter>include\constrained</Filter>
-    </ClInclude>
     <ClInclude Include="include\constrained\types.h">
       <Filter>include\constrained</Filter>
     </ClInclude>
@@ -69,6 +63,12 @@
       <Filter>include\constrained</Filter>
     </ClInclude>
     <ClInclude Include="include\constrained\fsm.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\generator.h">
+      <Filter>include\constrained</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constrained\codebook.h">
       <Filter>include\constrained</Filter>
     </ClInclude>
   </ItemGroup>

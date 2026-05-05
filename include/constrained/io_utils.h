@@ -5,7 +5,9 @@
 #include <vector>
 #include "constrained/types.h"
 
-std::string makeRunFolderName(int n, int k, int maxRunLength);
+// Folder name now includes division factor d for experiment traceability.
+// Example: run_n20_k4_r4_d2_20250501_143022
+std::string makeRunFolderName(int n, int k, int maxRunLength, int divisionFactor);
 
 bool createRunFolder(const std::string& folderName);
 
@@ -27,9 +29,11 @@ void saveSelectedCodebookCSV(const std::vector<CodewordRecord>& records,
     int k,
     const std::string& filepath);
 
+// Summary now includes divisionFactor and codeRate for easier batch analysis.
 void saveSummaryCSV(int n,
     int k,
     int maxRunLength,
+    int divisionFactor,
     int firstBlockLength,
     int secondBlockLength,
     int requiredCodewords,

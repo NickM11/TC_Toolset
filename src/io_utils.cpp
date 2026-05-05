@@ -6,9 +6,10 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <cmath>
 #include <direct.h>   // _mkdir
 
-std::string makeRunFolderName(int n, int k, int maxRunLength) {
+std::string makeRunFolderName(int n, int k, int maxRunLength, int divisionFactor) {
     std::time_t now = std::time(nullptr);
 
     std::tm localTime{};
@@ -18,6 +19,7 @@ std::string makeRunFolderName(int n, int k, int maxRunLength) {
     ss << "run_n" << n
         << "_k" << k
         << "_r" << maxRunLength
+        << "_d" << divisionFactor
         << "_"
         << (1900 + localTime.tm_year)
         << std::setw(2) << std::setfill('0') << (1 + localTime.tm_mon)
@@ -129,6 +131,7 @@ void saveSelectedCodebookCSV(const std::vector<CodewordRecord>& records,
 void saveSummaryCSV(int n,
     int k,
     int maxRunLength,
+    int divisionFactor,
     int firstBlockLength,
     int secondBlockLength,
     int requiredCodewords,
@@ -140,14 +143,27 @@ void saveSummaryCSV(int n,
         return;
     }
 
-    file << "n,k,maxRunLength,firstBlockLength,secondBlockLength,requiredCodewords,foundCodewords,lambda,capacity\n";
+    // Compute achieved code rate R = k/n
+    double codeRate = (n > 0) ? static_cast<double>(k) / static_cast<double>(n) : 0.0;
+
+    // Compute rate efficiency as percentage of channel capacity used
+    double rateEfficiency = (capacityResult.capacity > 0.0)
+        ? (codeRate / capacityResult.capacity) * 100.0
+        : 0.0;
+
+    file << "n,k,maxRunLength,divisionFactor,firstBlockLength,secondBlockLength,"
+        << "requiredCodewords,foundCodewords,codeRate,lambda,capacity,rateEfficiency\n";
+
     file << n << ","
         << k << ","
         << maxRunLength << ","
+        << divisionFactor << ","
         << firstBlockLength << ","
         << secondBlockLength << ","
         << requiredCodewords << ","
         << foundCodewords << ","
+        << codeRate << ","
         << capacityResult.lambda << ","
-        << capacityResult.capacity << "\n";
+        << capacityResult.capacity << ","
+        << rateEfficiency << "\n";
 }

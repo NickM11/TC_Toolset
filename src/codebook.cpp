@@ -2,24 +2,38 @@
 #include "constrained/generator.h"
 #include "constrained/fsm.h"
 
-BlockSplit getBlockSplit(int n) {
+#include <algorithm>
+#include <random>
+#include <stdexcept>
+
+BlockSplit getBlockSplit(int n, int d) {
+    if (d < 2) {
+        throw std::invalid_argument("Division factor d must be >= 2.");
+    }
+    if (d > n) {
+        throw std::invalid_argument("Division factor d must not exceed n.");
+    }
+
     BlockSplit split;
 
-    if (n % 2 == 0) {
-        split.firstLength = n / 2;
-        split.secondLength = n / 2;
-    }
-    else {
-        split.firstLength = (n + 1) / 2;
-        split.secondLength = (n - 1) / 2;
+    // First block gets the ceiling of n/d to avoid zero-length blocks
+    // when n is not evenly divisible by d.
+    split.firstLength = (n + d - 1) / d;   // ceiling division
+    split.secondLength = n - split.firstLength;
+
+    // Guard: second block must be at least 1 bit long
+    if (split.secondLength < 1) {
+        throw std::invalid_argument(
+            "Division factor d is too large: second block would be empty.");
     }
 
     return split;
 }
 
 std::vector<CodewordRecord> generateCodewordRecords(int n,
-    int maxRunLength) {
-    BlockSplit split = getBlockSplit(n);
+    int maxRunLength,
+    int divisionFactor) {
+    BlockSplit split = getBlockSplit(n, divisionFactor);
 
     std::vector<std::string> firstBlocks;
     std::vector<std::string> secondBlocks;
@@ -50,6 +64,7 @@ std::vector<CodewordRecord> generateCodewordRecords(int n,
                 continue;
             }
 
+            // Deduplication
             bool duplicate = false;
             for (const CodewordRecord& rec : records) {
                 if (rec.codeword == codeword) {
@@ -75,17 +90,27 @@ std::vector<CodewordRecord> generateCodewordRecords(int n,
 
 bool codeExists(int n,
     int k,
-    int maxRunLength) {
+    int maxRunLength,
+    int divisionFactor) {
     int requiredCodewords = 1 << k;
-    std::vector<CodewordRecord> records = generateCodewordRecords(n, maxRunLength);
+    std::vector<CodewordRecord> records =
+        generateCodewordRecords(n, maxRunLength, divisionFactor);
     return static_cast<int>(records.size()) >= requiredCodewords;
 }
 
 std::vector<CodewordRecord> selectCodebook(int n,
     int k,
-    int maxRunLength) {
+    int maxRunLength,
+    int divisionFactor) {
     int requiredCodewords = 1 << k;
-    std::vector<CodewordRecord> records = generateCodewordRecords(n, maxRunLength);
+
+    std::vector<CodewordRecord> records =
+        generateCodewordRecords(n, maxRunLength, divisionFactor);
+
+    std::random_device rd;
+    std::mt19937 generator(rd());
+
+    std::shuffle(records.begin(), records.end(), generator);
 
     if (static_cast<int>(records.size()) > requiredCodewords) {
         records.resize(requiredCodewords);

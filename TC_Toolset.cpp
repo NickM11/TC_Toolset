@@ -1,100 +1,165 @@
-#include <iostream>
-#include <string>
-#include <vector>
-
-#include "constrained/types.h"
 #include "constrained/states.h"
 #include "constrained/fsm.h"
-#include "constrained/generator.h"
 #include "constrained/capacity.h"
+#include "constrained/generator.h"
 #include "constrained/codebook.h"
 #include "constrained/io_utils.h"
+
+#include <iostream>
+#include <stdexcept>
 
 int main() {
     int n = 0;
     int k = 0;
     int maxRunLength = 0;
+    int divisionFactor = 0;
 
-    std::cout << "Enter n (codeword length): ";
+    // ----------------------------------------------------------------
+    // Parameter input
+    // ----------------------------------------------------------------
+    std::cout << "=== Translation Code Construction Toolset ===\n\n";
+
+    std::cout << "Enter codeword length         (n): ";
     std::cin >> n;
 
-    std::cout << "Enter k (message length): ";
+    std::cout << "Enter information block length (k): ";
     std::cin >> k;
 
-    std::cout << "Enter maximum run length constraint: ";
+    std::cout << "Enter max run-length constraint (r): ";
     std::cin >> maxRunLength;
 
-    if (n <= 0 || k < 0 || maxRunLength <= 0) {
-        std::cerr << "Invalid parameters.\n";
+    std::cout << "Enter division factor           (d): ";
+    std::cin >> divisionFactor;
+
+    std::cout << "\n";
+
+    // ----------------------------------------------------------------
+    // Basic validation
+    // ----------------------------------------------------------------
+    if (n < 2) {
+        std::cerr << "Error: n must be at least 2.\n";
+        return 1;
+    }
+    if (k < 1 || k >= n) {
+        std::cerr << "Error: k must satisfy 1 <= k < n.\n";
+        return 1;
+    }
+    if (maxRunLength < 1) {
+        std::cerr << "Error: max run-length must be at least 1.\n";
+        return 1;
+    }
+    if (divisionFactor < 2 || divisionFactor > n) {
+        std::cerr << "Error: division factor d must satisfy 2 <= d <= n.\n";
         return 1;
     }
 
-    BlockSplit split = getBlockSplit(n);
-    int requiredCodewords = 1 << k;
-
-    std::string runFolder = makeRunFolderName(n, k, maxRunLength);
-
-    if (!createRunFolder(runFolder)) {
-        std::cerr << "Could not create output folder: " << runFolder << "\n";
-        return 1;
-    }
-
+    // ----------------------------------------------------------------
+    // Step 1: Build state space
+    // ----------------------------------------------------------------
+    std::cout << "Building FSM state space...\n";
     std::vector<std::string> states = buildStates(maxRunLength);
+    std::cout << "  States: " << states.size() << "\n";
+
+    // ----------------------------------------------------------------
+    // Step 2: Compute channel capacity
+    // ----------------------------------------------------------------
+    std::cout << "Computing channel capacity...\n";
     CapacityResult capacityResult = computeCapacity(states, maxRunLength);
+    std::cout << "  Lambda max : " << capacityResult.lambda << "\n";
+    std::cout << "  Capacity C : " << capacityResult.capacity << " bits/symbol\n";
 
-    std::vector<CodewordRecord> allRecords = generateCodewordRecords(n, maxRunLength);
-    std::vector<CodewordRecord> selectedCodebook = selectCodebook(n, k, maxRunLength);
+    // Check that the requested code rate does not exceed capacity
+    double codeRate = static_cast<double>(k) / static_cast<double>(n);
+    if (codeRate > capacityResult.capacity) {
+        std::cerr << "\nWarning: requested code rate R = " << codeRate
+            << " exceeds channel capacity C = " << capacityResult.capacity
+            << ".\nA valid codebook of this size may not exist.\n\n";
+    }
 
-    std::cout << "\nParameters\n";
-    std::cout << "=====================================================\n";
-    std::cout << "n = " << n << "\n";
-    std::cout << "k = " << k << "\n";
-    std::cout << "maxRunLength = " << maxRunLength << "\n";
-    std::cout << "firstBlockLength = " << split.firstLength << "\n";
-    std::cout << "secondBlockLength = " << split.secondLength << "\n";
-    std::cout << "requiredCodewords = " << requiredCodewords << "\n";
+    // ----------------------------------------------------------------
+    // Step 3: Get block split
+    // ----------------------------------------------------------------
+    BlockSplit split;
+    try {
+        split = getBlockSplit(n, divisionFactor);
+    }
+    catch (const std::invalid_argument& e) {
+        std::cerr << "Error in block split: " << e.what() << "\n";
+        return 1;
+    }
+    std::cout << "Block split (d=" << divisionFactor << "): "
+        << split.firstLength << " + " << split.secondLength << " = " << n << "\n";
 
-    std::cout << "\nResults\n";
-    std::cout << "=====================================================\n";
-    std::cout << "Found valid codewords = " << allRecords.size() << "\n";
-    std::cout << "Lambda = " << capacityResult.lambda << "\n";
-    std::cout << "Capacity = " << capacityResult.capacity << " bits/symbol\n";
-    std::cout << "Code (" << n << "," << k << ") "
-        << (codeExists(n, k, maxRunLength) ? "exists" : "does NOT exist")
-        << "\n";
+    // ----------------------------------------------------------------
+    // Step 4: Generate codeword records
+    // ----------------------------------------------------------------
+    std::cout << "Generating codeword records...\n";
+    std::vector<CodewordRecord> records;
+    try {
+        records = generateCodewordRecords(n, maxRunLength, divisionFactor);
+    }
+    catch (const std::invalid_argument& e) {
+        std::cerr << "Error: " << e.what() << "\n";
+        return 1;
+    }
+    std::cout << "  Valid codewords found: " << records.size() << "\n";
 
-    std::vector<std::vector<double>> adjacencyMatrix =
-        buildAdjacencyMatrix(states, maxRunLength);
+    int requiredCodewords = 1 << k;
+    if (static_cast<int>(records.size()) < requiredCodewords) {
+        std::cerr << "Error: not enough valid codewords found ("
+            << records.size() << ") to build a codebook of size 2^k = "
+            << requiredCodewords << ".\n";
+        return 1;
+    }
 
-    saveFSMTableCSV(states,
-        maxRunLength,
-        runFolder + "/fsm_transitions.csv");
+    // ----------------------------------------------------------------
+    // Step 5: Select codebook
+    // ----------------------------------------------------------------
+    std::cout << "Selecting codebook (2^k = " << requiredCodewords << " codewords)...\n";
+    std::vector<CodewordRecord> codebook = selectCodebook(n, k, maxRunLength, divisionFactor);
+    std::cout << "  Codebook selected.\n";
 
-    saveAdjacencyMatrixCSV(adjacencyMatrix,
-        states,
-        runFolder + "/fsm_adjacency_matrix.csv");
+    // ----------------------------------------------------------------
+    // Step 6: Create output folder and save results
+    // ----------------------------------------------------------------
+    std::string folderName = makeRunFolderName(n, k, maxRunLength, divisionFactor);
+    std::cout << "Creating output folder: " << folderName << "\n";
 
-    saveCapacityResultsCSV(capacityResult,
-        runFolder + "/capacity_results.csv");
+    if (!createRunFolder(folderName)) {
+        std::cerr << "Error: could not create output folder.\n";
+        return 1;
+    }
 
-    saveCodewordRecordsCSV(allRecords,
-        runFolder + "/all_valid_codewords.csv");
+    std::string base = folderName + "/";
 
-    saveSelectedCodebookCSV(selectedCodebook,
-        k,
-        runFolder + "/selected_codebook.csv");
+    // Build adjacency matrix for CSV export
+    std::vector<std::vector<double>> adjMatrix = buildAdjacencyMatrix(states, maxRunLength);
 
-    saveSummaryCSV(n,
-        k,
-        maxRunLength,
-        split.firstLength,
-        split.secondLength,
+    saveFSMTableCSV(states, maxRunLength, base + "fsm_table.csv");
+    saveAdjacencyMatrixCSV(adjMatrix, states, base + "adjacency_matrix.csv");
+    saveCapacityResultsCSV(capacityResult, base + "capacity.csv");
+    saveCodewordRecordsCSV(records, base + "codeword_records.csv");
+    saveSelectedCodebookCSV(codebook, k, base + "codebook.csv");
+    saveSummaryCSV(
+        n, k, maxRunLength, divisionFactor,
+        split.firstLength, split.secondLength,
         requiredCodewords,
-        static_cast<int>(allRecords.size()),
+        static_cast<int>(records.size()),
         capacityResult,
-        runFolder + "/summary.csv");
+        base + "summary.csv"
+    );
 
-    std::cout << "\nSaved results in folder: " << runFolder << "\n";
+    // ----------------------------------------------------------------
+    // Done
+    // ----------------------------------------------------------------
+    std::cout << "\n=== Run complete ===\n";
+    std::cout << "  n              : " << n << "\n";
+    std::cout << "  k              : " << k << "\n";
+    std::cout << "  Max run-length : " << maxRunLength << "\n";
+    std::cout << "  Division factor: " << divisionFactor << "\n";
+    std::cout << "  Code rate R    : " << codeRate << "\n";
+    std::cout << "  Capacity C     : " << capacityResult.capacity << "\n";
+    std::cout << "  Output folder  : " << folderName << "\n";
 
     return 0;
 }
